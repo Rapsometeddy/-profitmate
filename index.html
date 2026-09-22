@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<title>ProfitMate — Rapsometeddy</title>
+<style>
+:root{--bg:#070b14;--card:#10182a;--card2:#0c1322;--text:#eef3ff;--muted:#91a0ba;--accent:#7c5cff;--good:#35d07f;--bad:#ff6577;--border:#202b42}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#18234a 0,#070b14 38%);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif;min-height:100vh}
+.app{max-width:980px;margin:auto;padding:18px 14px 40px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.brand{font-weight:800;font-size:22px}.brand span{color:var(--accent)}.tag{font-size:11px;color:var(--muted)}
+.hero{padding:22px;border:1px solid var(--border);border-radius:24px;background:linear-gradient(135deg,#121d35,#0c1322);box-shadow:0 15px 50px #0005}.eyebrow{color:#a99aff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.4px}.hero h1{font-size:clamp(28px,7vw,48px);line-height:1.02;margin:8px 0}.hero p{color:var(--muted);max-width:650px;margin:0}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.stat,.panel{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px}.label{font-size:12px;color:var(--muted)}.value{font-size:22px;font-weight:800;margin-top:5px}.good{color:var(--good)}.bad{color:var(--bad)}
+.layout{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}.panel h2{font-size:16px;margin:0 0 14px}.form{display:grid;gap:10px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}input,select,button{width:100%;border:1px solid var(--border);border-radius:12px;padding:12px;background:var(--card2);color:var(--text);font:inherit}button{background:var(--accent);border:0;font-weight:800;cursor:pointer}.secondary{background:#172139}.danger{background:#341822;color:#ff9aa7}.list{display:grid;gap:8px}.item{display:flex;justify-content:space-between;gap:10px;padding:12px;border-radius:12px;background:#0c1322;border:1px solid #19243a}.item small{color:var(--muted)}.empty{color:var(--muted);font-size:13px;padding:12px 0}.goalbar{height:9px;background:#202a40;border-radius:99px;overflow:hidden;margin:10px 0}.goalbar i{display:block;height:100%;background:var(--accent);width:0}.actions{display:flex;gap:8px;margin-top:10px}.actions button{font-size:12px;padding:9px}.footer{text-align:center;color:var(--muted);font-size:11px;margin-top:22px}
+@media(max-width:720px){.grid{grid-template-columns:1fr 1fr}.layout{grid-template-columns:1fr}.hero{padding:18px}.row{grid-template-columns:1fr}.value{font-size:19px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><div class="brand">Profit<span>Mate</span></div><div class="tag">Rapsometeddy • money OS</div></header>
+<section class="hero"><div class="eyebrow">Build • Track • Grow</div><h1>Turn every rand into a plan.</h1><p>A simple personal finance and micro-business dashboard. Your data stays on this device.</p></section>
+<section class="grid">
+<div class="stat"><div class="label">Balance</div><div id="balance" class="value">R0.00</div></div>
+<div class="stat"><div class="label">Income</div><div id="income" class="value good">R0.00</div></div>
+<div class="stat"><div class="label">Expenses</div><div id="expenses" class="value bad">R0.00</div></div>
+<div class="stat"><div class="label">Profit</div><div id="profit" class="value">R0.00</div></div>
+</section>
+<div class="layout">
+<section class="panel">
+<h2>Add transaction</h2>
+<form id="txForm" class="form">
+<div class="row"><select id="type"><option value="income">Income</option><option value="expense">Expense</option></select><input id="amount" type="number" min="0.01" step="0.01" placeholder="Amount (R)" required></div>
+<input id="description" placeholder="What was it? e.g. freelance job" required>
+<button>Add transaction</button>
+</form>
+<div style="height:18px"></div><h2>Recent activity</h2><div id="transactions" class="list"></div>
+</section>
+<aside class="panel">
+<h2>Monthly target</h2>
+<form id="goalForm" class="form"><input id="goal" type="number" min="0" step="100" placeholder="Target (R)"><button>Save target</button></form>
+<div id="goalText" class="label" style="margin-top:12px">No target set.</div><div class="goalbar"><i id="goalBar"></i></div>
+<div class="actions"><button class="secondary" id="export">Export data</button><button class="danger" id="reset">Reset</button></div>
+</aside>
+</div>
+<div class="footer">ProfitMate is a planning/record-keeping tool, not financial advice.</div>
+</div>
+<script>
+const KEY="profitmate_v1";
+let state=JSON.parse(localStorage.getItem(KEY)||'{"transactions":[],"goal":0}');
+const money=n=>new Intl.NumberFormat("en-ZA",{style:"currency",currency:"ZAR"}).format(n);
+function save(){localStorage.setItem(KEY,JSON.stringify(state));render()}
+function render(){
+ const income=state.transactions.filter(x=>x.type==="income").reduce((a,x)=>a+x.amount,0);
+ const expenses=state.transactions.filter(x=>x.type==="expense").reduce((a,x)=>a+x.amount,0);
+ const profit=income-expenses;
+ document.querySelector("#balance").textContent=money(profit);
+ document.querySelector("#income").textContent=money(income);
+ document.querySelector("#expenses").textContent=money(expenses);
+ document.querySelector("#profit").textContent=money(profit);
+ const list=document.querySelector("#transactions"); list.innerHTML="";
+ if(!state.transactions.length) list.innerHTML='<div class="empty">No transactions yet. Add your first one above.</div>';
+ state.transactions.slice().reverse().slice(0,10).forEach((x,i)=>{
+  const d=document.createElement("div"); d.className="item";
+  d.innerHTML='<div><b>'+escapeHtml(x.description)+'</b><br><small>'+x.date+' • '+x.type+'</small></div><strong class="'+(x.type==="income"?"good":"bad")+'">'+(x.type==="income"?"+":"-")+money(x.amount)+'</strong>';
+  list.appendChild(d);
+ });
+ const pct=state.goal?Math.min(100,Math.max(0,profit/state.goal*100)):0;
+ document.querySelector("#goalText").textContent=state.goal?money(profit)+" of "+money(state.goal)+" target ("+Math.round(pct)+"%)":"No target set.";
+ document.querySelector("#goalBar").style.width=pct+"%";
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+document.querySelector("#txForm").onsubmit=e=>{e.preventDefault();const amount=Number(document.querySelector("#amount").value);if(!amount)return;state.transactions.push({type:document.querySelector("#type").value,amount,description:document.querySelector("#description").value.trim(),date:new Date().toLocaleDateString("en-ZA")});e.target.reset();save()};
+document.querySelector("#goalForm").onsubmit=e=>{e.preventDefault();state.goal=Number(document.querySelector("#goal").value)||0;save()};
+document.querySelector("#reset").onclick=()=>{if(confirm("Delete all ProfitMate data on this device?")){state={transactions:[],goal:0};save()}};
+document.querySelector("#export").onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="profitmate-data.json";a.click();URL.revokeObjectURL(a.href)};
+render();
+</script>
+</body>
+</html>
