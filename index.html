@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1020">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>ProfitMate — Rapsometeddy</title>
 <style>
 :root{--bg:#070b14;--card:#10182a;--card2:#0c1322;--text:#eef3ff;--muted:#91a0ba;--accent:#7c5cff;--good:#35d07f;--bad:#ff6577;--border:#202b42}
@@ -179,6 +183,8 @@ supabase.auth.onAuthStateChange(async(_event,newSession)=>{
  if(session){document.querySelector("#signout").style.display="block";await loadCloud()}
  else render();
 })();
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();window.__profitMateInstallPrompt=e;});
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));}
 </script>
 </body>
 </html>
