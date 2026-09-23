@@ -1,0 +1,10 @@
+{
+  "name":"ProfitMate — Rapsometeddy",
+  "short_name":"ProfitMate",
+  "description":"Phone-first personal finance and micro-business dashboard.",
+  "start_url":"/",
+  "display":"standalone",
+  "background_color":"#070b14",
+  "theme_color":"#0b1020",
+  "icons":[]
+}
